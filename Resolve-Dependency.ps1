@@ -120,8 +120,8 @@ try
         #>
         Get-Module -ListAvailable PackageManagement |
             Where-Object -Property 'ModuleBase' -NotMatch 'powershell.7' |
-            Select-Object -First 1 |
-            Import-Module -Force
+                Select-Object -First 1 |
+                    Import-Module -Force
     }
 
     Write-Verbose -Message 'Importing Bootstrap default parameters from ''$PSScriptRoot/Resolve-Dependency.psd1''.'
@@ -155,7 +155,7 @@ try
 
                 $PSBoundParameters.Add($parameterName, $variableValue)
 
-                Set-Variable -Name $parameterName -value $variableValue -Force -ErrorAction 'SilentlyContinue'
+                Set-Variable -Name $parameterName -Value $variableValue -Force -ErrorAction 'SilentlyContinue'
             }
             catch
             {
@@ -169,7 +169,9 @@ catch
     Write-Warning -Message "Error attempting to import Bootstrap's default parameters from '$resolveDependencyConfigPath': $($_.Exception.Message)."
 }
 
-Write-Progress -Activity 'Bootstrap:' -PercentComplete 0 -CurrentOperation 'NuGet Bootstrap'
+#Write-Progress -Activity 'Bootstrap:' -PercentComplete 0 -CurrentOperation 'NuGet Bootstrap'
+Write-Host '[bootstrap] Nuget bootstrap' -ForegroundColor Cyan
+
 
 # TODO: This should handle the parameter $AllowOldPowerShellGetModule.
 $powerShellGetModule = Import-Module -Name 'PowerShellGet' -MinimumVersion '2.0' -ErrorAction 'SilentlyContinue' -PassThru
@@ -234,7 +236,8 @@ if ($RegisterGallery)
         $RegisterGallery.Name = $Gallery
     }
 
-    Write-Progress -Activity 'Bootstrap:' -PercentComplete 7 -CurrentOperation "Verifying private package repository '$Gallery'" -Completed
+    #Write-Progress -Activity 'Bootstrap:' -PercentComplete 7 -CurrentOperation "Verifying private package repository '$Gallery'" -Completed
+    Write-Host '[bootstrap] Verifying private package repository' -ForegroundColor Cyan
 
     $previousRegisteredRepository = Get-PSRepository -Name $Gallery -ErrorAction 'SilentlyContinue'
 
@@ -242,7 +245,8 @@ if ($RegisterGallery)
     {
         if ($previousRegisteredRepository)
         {
-            Write-Progress -Activity 'Bootstrap:' -PercentComplete 9 -CurrentOperation "Re-registrering private package repository '$Gallery'" -Completed
+            #Write-Progress -Activity 'Bootstrap:' -PercentComplete 9 -CurrentOperation "Re-registrering private package repository '$Gallery'" -Completed
+            Write-Host '[bootstrap] Re-registring private package reposiory' -ForegroundColor Cyan
 
             Unregister-PSRepository -Name $Gallery
 
@@ -250,14 +254,16 @@ if ($RegisterGallery)
         }
         else
         {
-            Write-Progress -Activity 'Bootstrap:' -PercentComplete 9 -CurrentOperation "Registering private package repository '$Gallery'" -Completed
+            #Write-Progress -Activity 'Bootstrap:' -PercentComplete 9 -CurrentOperation "Registering private package repository '$Gallery'" -Completed
+            Write-Host '[bootstrap] Registring private package repository PSGallery' -ForegroundColor Cyan
         }
 
         Register-PSRepository @RegisterGallery
     }
 }
 
-Write-Progress -Activity 'Bootstrap:' -PercentComplete 10 -CurrentOperation "Ensuring Gallery $Gallery is trusted"
+#Write-Progress -Activity 'Bootstrap:' -PercentComplete 10 -CurrentOperation "Ensuring Gallery $Gallery is trusted"
+Write-Host '[bootstrap] Ensuring PSGallery is trusted' -ForegroundColor Cyan
 
 # Fail if the given PSGallery is not registered.
 $previousGalleryInstallationPolicy = (Get-PSRepository -Name $Gallery -ErrorAction 'Stop').InstallationPolicy
@@ -270,7 +276,8 @@ if ($previousGalleryInstallationPolicy -ne 'Trusted')
 
 try
 {
-    Write-Progress -Activity 'Bootstrap:' -PercentComplete 25 -CurrentOperation 'Checking PowerShellGet'
+    #Write-Progress -Activity 'Bootstrap:' -PercentComplete 25 -CurrentOperation 'Checking PowerShellGet'
+    Write-Host '[bootstrap] Checking PowershellGet' -ForegroundColor Cyan
 
     # Ensure the module is loaded and retrieve the version you have.
     $powerShellGetVersion = (Import-Module -Name 'PowerShellGet' -PassThru -ErrorAction 'SilentlyContinue').Version
@@ -280,7 +287,8 @@ try
     # Versions below 2.0 are considered old, unreliable & not recommended
     if (-not $powerShellGetVersion -or ($powerShellGetVersion -lt [System.Version] '2.0' -and -not $AllowOldPowerShellGetModule))
     {
-        Write-Progress -Activity 'Bootstrap:' -PercentComplete 40 -CurrentOperation 'Installing newer version of PowerShellGet'
+        #Write-Progress -Activity 'Bootstrap:' -PercentComplete 40 -CurrentOperation 'Installing newer version of PowerShellGet'
+        Write-Host '[bootstrap] Installing newer version of PowershellGet' -ForegroundColor Cyan
 
         $installPowerShellGetParameters = @{
             Name               = 'PowerShellGet'
@@ -309,7 +317,8 @@ try
             }
         }
 
-        Write-Progress -Activity 'Bootstrap:' -PercentComplete 60 -CurrentOperation 'Installing newer version of PowerShellGet'
+        #Write-Progress -Activity 'Bootstrap:' -PercentComplete 60 -CurrentOperation 'Installing newer version of PowerShellGet'
+        Write-Host '[bootstrap] Installing newer version of PowershellGet' -ForegroundColor Cyan
 
         Install-Module @installPowerShellGetParameters
 
@@ -367,6 +376,7 @@ try
             }
 
             Write-Progress -Activity 'Bootstrap:' -PercentComplete 75 -CurrentOperation "Installing PSDepend from $Gallery"
+            Write-Host "[bootstrap] Installing PSDepend from $Gallery" -ForegroundColor Cyan
 
             Install-Module @installPSDependParameters
         }
@@ -386,13 +396,15 @@ try
                 $saveModuleParameters.add('MinimumVersion', $MinimumPSDependVersion)
             }
 
-            Write-Progress -Activity 'Bootstrap:' -PercentComplete 75 -CurrentOperation "Saving & Importing PSDepend from $Gallery to $Scope"
+            #Write-Progress -Activity 'Bootstrap:' -PercentComplete 75 -CurrentOperation "Saving & Importing PSDepend from $Gallery to $Scope"
+            Write-Host "[bootstrap] Saving & Importing PSDepend from $Gallery to $Scope" -ForegroundColor Cyan
 
             Save-Module @saveModuleParameters
         }
     }
 
-    Write-Progress -Activity 'Bootstrap:' -PercentComplete 80 -CurrentOperation 'Loading PSDepend'
+    #Write-Progress -Activity 'Bootstrap:' -PercentComplete 80 -CurrentOperation 'Loading PSDepend'
+    Write-Host '[bootstrap] Loading PSDepend' -ForegroundColor Cyan
 
     $importModulePSDependParameters = @{
         Name        = 'PSDepend'
@@ -410,11 +422,13 @@ try
 
     if ($WithYAML)
     {
-        Write-Progress -Activity 'Bootstrap:' -PercentComplete 82 -CurrentOperation 'Verifying PowerShell module PowerShell-Yaml'
+        #Write-Progress -Activity 'Bootstrap:' -PercentComplete 82 -CurrentOperation 'Verifying PowerShell module PowerShell-Yaml'
+        Write-Host '[bootstrap] Verifying Powershell module Powershell-Yaml' -ForegroundColor Cyan
 
         if (-not (Get-Module -ListAvailable -Name 'PowerShell-Yaml'))
         {
-            Write-Progress -Activity 'Bootstrap:' -PercentComplete 85 -CurrentOperation 'Installing PowerShell module PowerShell-Yaml'
+            #Write-Progress -Activity 'Bootstrap:' -PercentComplete 85 -CurrentOperation 'Installing PowerShell module PowerShell-Yaml'
+            Write-Host '[bootstrap] Installing Powershell module Powershell-Yaml' -ForegroundColor Cyan
 
             Write-Verbose -Message "PowerShell-Yaml module not found. Attempting to Save from Gallery '$Gallery' to '$PSDependTarget'."
 
@@ -429,13 +443,15 @@ try
         }
         else
         {
-            Write-Verbose "PowerShell-Yaml is already available"
+            Write-Verbose 'PowerShell-Yaml is already available'
         }
     }
 
-    Write-Progress -Activity 'Bootstrap:' -PercentComplete 90 -CurrentOperation 'Invoke PSDepend'
+    #Write-Progress -Activity 'Bootstrap:' -PercentComplete 90 -CurrentOperation 'Invoke PSDepend'
+    Write-Host '[bootstrap] Invoke PSDepend' -ForegroundColor Cyan
 
-    Write-Progress -Activity "PSDepend:" -PercentComplete 0 -CurrentOperation "Restoring Build Dependencies"
+    #Write-Progress -Activity 'PSDepend:' -PercentComplete 0 -CurrentOperation 'Restoring Build Dependencies'
+    Write-Host '[bootstrap] Restoring Build Dependencies' -ForegroundColor Cyan
 
     if (Test-Path -Path $DependencyFile)
     {
@@ -448,9 +464,11 @@ try
         Invoke-PSDepend @psDependParameters
     }
 
-    Write-Progress -Activity "PSDepend:" -PercentComplete 100 -CurrentOperation "Dependencies restored" -Completed
+    #Write-Progress -Activity 'PSDepend:' -PercentComplete 100 -CurrentOperation 'Dependencies restored' -Completed
+    Write-Host '[bootstrap] Dependencies restored' -ForegroundColor Cyan
 
-    Write-Progress -Activity 'Bootstrap:' -PercentComplete 100 -CurrentOperation "Bootstrap complete" -Completed
+    #Write-Progress -Activity 'Bootstrap:' -PercentComplete 100 -CurrentOperation 'Bootstrap complete' -Completed
+    Write-Host '[bootstrap] Bootstrap complete' -ForegroundColor Cyan
 }
 finally
 {
@@ -465,7 +483,7 @@ finally
         Write-Verbose -Message "Reverting private package repository '$Gallery' to previous location URI:s."
 
         $registerPSRepositoryParameters = @{
-            Name = $previousRegisteredRepository.Name
+            Name               = $previousRegisteredRepository.Name
             InstallationPolicy = $previousRegisteredRepository.InstallationPolicy
         }
 
@@ -502,5 +520,5 @@ finally
         }
     }
 
-    Write-Verbose -Message "Project Bootstrapped, returning to Invoke-Build"
+    Write-Verbose -Message 'Project Bootstrapped, returning to Invoke-Build'
 }
