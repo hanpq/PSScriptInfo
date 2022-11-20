@@ -1,22 +1,22 @@
 ﻿name: Build
 on:
   workflow_dispatch:
-    branches: [main]
+    branches:
+      - main
   pull_request:
-    branches: [main]
+    branches:
+      - main
     paths:
       - "source/**"
       - "tests/**"
-      - ".github/**"
   push:
-    branches: [main]
+    branches:
+      - main
     tags-ignore:
       - "*-*"
     paths:
       - "source/**"
       - "tests/**"
-      - ".github/**"
-      - ".build/**"
 
 env:
   PFX_BASE64: ${{ secrets.PFX_BASE64 }}
