@@ -54,7 +54,7 @@ BuildWorkflow:
     - Update_GetPSDev_Docs
     - Publish_release_to_GitHub
     - publish_module_to_gallery
-    #- publish_module_to_proget
+    - publish_module_to_proget
 
 ####################################################
 #       PESTER  Configuration                      #

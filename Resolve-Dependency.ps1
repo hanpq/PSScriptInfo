@@ -174,7 +174,7 @@ Write-Host '[bootstrap] Nuget bootstrap' -ForegroundColor Cyan
 
 
 # TODO: This should handle the parameter $AllowOldPowerShellGetModule.
-$powerShellGetModule = Import-Module -Name 'PowerShellGet' -MinimumVersion '2.0' -ErrorAction 'SilentlyContinue' -PassThru
+$powerShellGetModule = Import-Module -Name 'PowerShellGet' -MinimumVersion '2.0' -MaximumVersion '2.9' -ErrorAction 'SilentlyContinue' -PassThru
 
 # Install the package provider if it is not available.
 $nuGetProvider = Get-PackageProvider -Name 'NuGet' -ListAvailable | Select-Object -First 1
@@ -280,7 +280,7 @@ try
     Write-Host '[bootstrap] Checking PowershellGet' -ForegroundColor Cyan
 
     # Ensure the module is loaded and retrieve the version you have.
-    $powerShellGetVersion = (Import-Module -Name 'PowerShellGet' -PassThru -ErrorAction 'SilentlyContinue').Version
+    $powerShellGetVersion = (Import-Module -Name 'PowerShellGet' -MinimumVersion '2.0' -MaximumVersion '2.9' -PassThru -ErrorAction 'SilentlyContinue').Version
 
     Write-Verbose -Message "Bootstrap: The PowerShellGet version is $powerShellGetVersion"
 
@@ -375,7 +375,7 @@ try
                 $installPSDependParameters.Add('MinimumVersion', $MinimumPSDependVersion)
             }
 
-            Write-Progress -Activity 'Bootstrap:' -PercentComplete 75 -CurrentOperation "Installing PSDepend from $Gallery"
+            #Write-Progress -Activity 'Bootstrap:' -PercentComplete 75 -CurrentOperation "Installing PSDepend from $Gallery"
             Write-Host "[bootstrap] Installing PSDepend from $Gallery" -ForegroundColor Cyan
 
             Install-Module @installPSDependParameters

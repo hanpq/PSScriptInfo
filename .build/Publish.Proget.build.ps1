@@ -88,31 +88,25 @@ param
     $PSTOOLS_PASS = (property PSTOOLS_PASS '')
 )
 
-Task publish_module_to_proget -if ($PSTOOLS_APITOKEN -and (Get-Command -Name 'Publish-Module' -ErrorAction 'SilentlyContinue')) {
+Task publish_module_to_proget -if ($PSTOOLS_APITOKEN) {
     . Set-SamplerTaskVariable
 
-    Import-Module -name 'ModuleBuilder' -ErrorAction 'Stop'
+    # ModuleBuild for Write-Build
+    Import-Module -name 'ModuleBuilder' -ErrorAction Stop
 
-    Write-Build DarkGray "`nAbout to release '$BuiltModuleBase'."
-    Write-Build DarkGray "APIToken     : $($PSTOOLS_APITOKEN.SubString(0,5))..."
-    Write-Build DarkGray 'Repository   : pstools'
-    Write-Build DarkGray "Username     : $($PSTOOLS_USER.SubString(0,5))"
-    Write-Build DarkGray "Password     : $($PSTOOLS_PASS.SubString(0,5))"
+    Write-Build DarkGray "`nAbout to publish '$BuiltModuleBase'."
 
-    $Credentials = [pscredential]::New($PSTOOLS_USER, (ConvertTo-SecureString -String $PSTOOLS_PASS -AsPlainText -Force))
-    Write-Build DarkGray 'Created credentials  object'
+    Import-Module PowershellGet -RequiredVersion 3.0.17 -Force
+    Write-Build DarkGray 'Imported PowershellGet v3'
 
-    if (-not (Get-PSRepository -name 'pstools' -ErrorAction SilentlyContinue))
-    {
-        Write-Build DarkGray 'pstools repository not found, registering...'
-        Register-PSRepository -name 'pstools' -SourceLocation $PSTOOLS_SOURCE -Credential $Credentials -InstallationPolicy Trusted -PublishLocation $PSTOOLS_SOURCE
-        Write-Build DarkGray 'pstools repository registried'
-    }
+    $RepoGuid = (New-Guid).Guid
+    Register-PSResourceRepository -name $RepoGuid -Uri $PSTOOLS_SOURCE -Trusted
+    Write-Build DarkGray 'Registered ResourceRepository'
 
     try
     {
         Write-Build DarkGray 'Trying to publish module to pstools...'
-        Publish-Module -NuGetApiKey $PSTOOLS_APITOKEN -Path $BuiltModuleBase -Repository 'pstools' -ErrorAction Stop
+        Publish-PSResource -ApiKey $PSTOOLS_APITOKEN -Path $BuiltModuleBase -Repository $RepoGuid -ErrorAction Stop
         Write-Build Green 'Successfully published module to ProGet'
     }
     catch
@@ -125,5 +119,9 @@ Task publish_module_to_proget -if ($PSTOOLS_APITOKEN -and (Get-Command -Name 'Pu
         {
             throw $_
         }
+    }
+    finally
+    {
+        Unregister-PSResourceRepository -name $RepoGuid -Confirm:$false
     }
 }

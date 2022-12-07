@@ -22,7 +22,7 @@ env:
   PFX_BASE64: ${{ secrets.PFX_BASE64 }}
   PFX_PASS: ${{ secrets.PFX_PASS }}
   PSTOOLS_APITOKEN: ${{ secrets.PSTOOLS_APITOKEN }}
-  PSTOOLS_SOURCE: ${{ secrets.PSTOOLS_APITOKEN }}
+  PSTOOLS_SOURCE: ${{ secrets.PSTOOLS_SOURCE }}
 
 jobs:
   Build:
