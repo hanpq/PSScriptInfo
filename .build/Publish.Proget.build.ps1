@@ -89,10 +89,26 @@ param
 )
 
 Task publish_module_to_proget -if ($PSTOOLS_APITOKEN) {
+    # This task fails when publishing a non-preview version. The reason is that Publish-PSResource
+    # does not allow the manifest attribute PreRelease = ''. It will fail with a strange error
+    # The required element version is missing in manifest.
+    # The module ModuleBuilder that is responsible for generating the module output requires that
+    # the attribute PreRelease is defined as a empty string in the source module manifest regardless
+    # of weather it will be populated or not. PowershellGet v2 does not care if PreRelease is defined
+    # as an empty string when publishing a non-prerelease version however PowershellGet v3 does not
+    # allow it. And PowershellGet v3 is required when publishing to proget.
+    # Proposed solution is to remove the empty prerelease attribute in the manifest before publishing
+    # to proget.
+
     . Set-SamplerTaskVariable
 
-    # ModuleBuild for Write-Build
-    Import-Module -name 'ModuleBuilder' -ErrorAction Stop
+    # Remove empty Prerelease property, see note above
+    $UpdatedManifest = Get-Content $BuiltModuleManifest | Where-Object { $_ -notlike "*Prerelease*= ''" }
+    $UpdatedManifest | Set-Content $BuiltModuleManifest
+    Write-Build DarkGray 'Removed empty Prerelease property if present'
+
+    Import-Module -Name 'ModuleBuilder' -ErrorAction Stop
+    Write-Build DarkGray 'Imported module ModuleBuilder'
 
     Write-Build DarkGray "`nAbout to publish '$BuiltModuleBase'."
 
@@ -100,7 +116,7 @@ Task publish_module_to_proget -if ($PSTOOLS_APITOKEN) {
     Write-Build DarkGray 'Imported PowershellGet v3'
 
     $RepoGuid = (New-Guid).Guid
-    Register-PSResourceRepository -name $RepoGuid -Uri $PSTOOLS_SOURCE -Trusted
+    Register-PSResourceRepository -Name $RepoGuid -Uri $PSTOOLS_SOURCE -Trusted
     Write-Build DarkGray 'Registered ResourceRepository'
 
     try
@@ -115,6 +131,10 @@ Task publish_module_to_proget -if ($PSTOOLS_APITOKEN) {
         {
             Write-Build Yellow 'This module version is already published to ProGet'
         }
+        elseif ($_.Exception.message -like '*The required element*version*is missing*')
+        {
+            Write-Build Red 'Failed to publish module because element version is missing from the manifest'
+        }
         else
         {
             throw $_
@@ -122,6 +142,6 @@ Task publish_module_to_proget -if ($PSTOOLS_APITOKEN) {
     }
     finally
     {
-        Unregister-PSResourceRepository -name $RepoGuid -Confirm:$false
+        Unregister-PSResourceRepository -Name $RepoGuid -Confirm:$false
     }
 }
