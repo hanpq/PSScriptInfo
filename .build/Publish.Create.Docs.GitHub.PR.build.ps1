@@ -127,7 +127,7 @@ module.exports = [
         $null = New-DocusaurusHelp @DocuSplat -ErrorAction Stop -WarningAction SilentlyContinue
 
         # Generate new changelog
-        $SourceChangeLogPath = Join-Path $args[3] 'changelog.md'
+        $SourceChangeLogPath = Join-Path $args[3] 'CHANGELOG.md'
         Write-Output "Source changelog path is: $SourceChangeLogPath"
         $ChangeLogContent = Get-Content $SourceChangeLogPath -Raw
         $DestinationModulePath = Join-Path $TemporaryDocsFolderModules $args[1]
