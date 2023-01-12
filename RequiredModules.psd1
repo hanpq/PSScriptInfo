@@ -25,7 +25,7 @@
             Repository      = 'PSGallery'
             AllowPrerelease = $true
         }
-        Version        = '3.0.17-beta17'
+        Version        = '3.0.18-beta18'
     }
 
 
