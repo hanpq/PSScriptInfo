@@ -77,6 +77,7 @@ Pester:
       OutputPath: CodeCov.xml
       OutputEncoding: ascii
       ExcludeTests:
+      UseBreakpoints: false
     TestResult:
       OutputFormat: NUnitXML
       OutputPath:
