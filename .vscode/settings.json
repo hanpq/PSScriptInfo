@@ -1,0 +1,23 @@
+{
+    "github.copilot.chat.commitMessageGeneration.instructions": [
+        {
+            "file": ".github/copilot-instructions.md"
+        }
+    ],
+    "cSpell.words": [
+        "APITOKEN",
+        "GALLERYAPITOKEN",
+        "GITHUBTOKEN",
+        "PSTOOLS",
+        "hanpq",
+        "LASTEXITCODE",
+        "mkdocs",
+        "notmatch",
+        "psake",
+        "PSHOME",
+        "platyps",
+        "Powershellgallery"
+    ],
+    "cSpell.unknownWords": "report-common-typos",
+    "cSpell.numSuggestions": 4
+}

@@ -8,7 +8,7 @@
 
 @{
     RootModule           = 'PSScriptInfo.psm1'
-    ModuleVersion        = '0.0.1'
+    ModuleVersion        = '1.4.0'
     CompatiblePSEditions = @('Desktop', 'Core')
     PowerShellVersion    = '5.1'
     GUID                 = '85a70594-7a0d-4606-a1c2-2eda65cb54a1'
