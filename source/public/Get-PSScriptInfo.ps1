@@ -44,7 +44,7 @@
         # Extract PSScriptInfo from JSON
         try
         {
-            $PSScriptInfoRaw = @($PSScriptInfoText.Split("`n") | Select-Object -Skip 1 -ErrorAction Stop | Select-Object -SkipLast 1 -ErrorAction Stop)
+            $PSScriptInfoRaw = @($($PSScriptInfoText.ToString().Trim() -replace '^<#PSScriptInfo' -replace '#>$').ToString().Trim().Split("`n"))
             $PSScriptInfo = $PSScriptInfoRaw | ConvertFrom-Json -ErrorAction Stop
             Write-Verbose -Message 'Parsed PSScriptInfo to JSON'
         }
